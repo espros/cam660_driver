@@ -1,0 +1,34 @@
+
+********************************************************************************
+Changelog cam660_driver
+
+ESPROS Photonics Corp.
+
+Author: linas.sinkunas@espros.com
+********************************************************************************
+
+Software v.1.3.0 - Document dated 08.05.2019
+
+  - Changed point cloud mm -> m (millimeters to meters)
+  - Gave NAN values for non valid point cloud pixels
+  - Changed rviz configuration
+
+
+Software v.1.2.0 
+
+  - Fixed undistortion
+  - Fixed cartesian transformation
+  - Optimised speed
+
+
+Software v.1.1.0
+
+  - Fixed a communication problem for ROS kinetic distribution
+  - Added automatic integration time
+  - Added more Wide and Narrow field modes 
+
+
+
+Software v.1.0.0
+
+ - First cam635_ROS_driver version for melodic ROS distribution

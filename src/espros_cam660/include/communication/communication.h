@@ -50,13 +50,12 @@ public:
     ErrorNumber_e setRoi(const unsigned int xMin, const unsigned int yMin, const unsigned int xMax, const unsigned int yMax);
 
     //Acquisition commands        
-    void getDcs();    
+    void getDcs(uint8_t streaming);
     void stopStream();
     void startStream();
-    void getGrayscale();
-    void getDistance();
-    void getDistanceAmplitude();
-
+    void getGrayscale(uint8_t streaming);
+    void getDistance(uint8_t streaming);
+    void getDistanceAmplitude(uint8_t streaming);
 
     //signals
     boost::signals2::signal<void ()> sigReceivedAnswer;
@@ -79,9 +78,9 @@ private:
     void onReceivedData(const std::vector<uint8_t> &array, const uint8_t type);
     void onTimeout();
 
-    ErrorNumber_e sendCommand(uint8_t *data, int size, bool streamMode = false);
+    ErrorNumber_e sendCommand(uint8_t *data, int answerSize, bool streamMode = false);
     ErrorNumber_e sendCommandWithoutData(const uint8_t command, int size, bool streamMode = false);
-    ErrorNumber_e sendCommandSingleByte(const uint8_t command, const uint8_t payload, int size = CommunicationConstants::Command::SIZE_PAYLOAD, bool streaming = false);
+    ErrorNumber_e sendCommandSingleByte(const uint8_t command, const uint8_t payload, int size = com_const::Command::SIZE_PAYLOAD, bool streaming = false);
     ErrorNumber_e sendCommandUint16(const uint8_t command, const uint16_t payload);
     ErrorNumber_e sendCommandInt16(const uint8_t command, const int16_t payload);
     ErrorNumber_e sendCommand2xUint16(const uint8_t command, const uint16_t payload0, const uint16_t payload1);
@@ -109,6 +108,7 @@ private:
     unsigned int yMin;
     unsigned int xMax;
     unsigned int yMax;
+    bool reopenPort;    
 
 public:
     SerialConnection *serialConnection;     ///<SerialConnection instance

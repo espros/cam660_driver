@@ -12,20 +12,20 @@ imagePublisher1(imagePublisher1_),
 imagePublisher2(imagePublisher2_),
 pointCloud2Publisher(pointCloud2Publisher_),
 temperaturePublisher(temperaturePublisher_)
-{        
+{
     numCols = 320;
     numRows = 240;
     frameSeq = 0;
     imageSize8 = 0;
     imageSize16_1 = 0;
-    imageSize16_2 = 0;        
-    gSettings = &set_;    
+    imageSize16_2 = 0;
+    gSettings = &set_;
     sensorPointSizeMM = 0.02; //sensor pixel size mm
     gSettings->runVideo = false;
     gSettings->updateParam = false;
     lastSingleShot = false;
     lastStreaming = false;
-    strFrameID = "sensor_frame";    
+    strFrameID = "sensor_frame";
 
     initCommunication();
 
@@ -33,32 +33,31 @@ temperaturePublisher(temperaturePublisher_)
     communication.sigReceivedDistance.connect(boost::bind(&Camera660Driver::updateDistanceFrame, this, _1));
     communication.sigReceivedDistanceAmplitude.connect(boost::bind(&Camera660Driver::updateDistanceAmplitudeFrame, this, _1));    
 
-    gSettings->updateParam = true;        
+    gSettings->updateParam = true;
     timeLast = ros::Time::now();
 
     setParameters();
 
     if(gSettings->startStream)
-      gSettings->runVideo = true;
+        gSettings->runVideo = true;
 
-    cartesian.initLensTransform(sensorPointSizeMM, numCols, numRows, gSettings->lensCenterOffsetX, gSettings->lensCenterOffsetY, gSettings->lensType);
+    cartesian.initLensTransform(sensorPointSizeMM, numCols, numRows, gSettings->lensCenterOffsetX, gSettings->lensCenterOffsetY, gSettings->lensData);
     oldLensCenterOffsetX = gSettings->lensCenterOffsetX;
-    oldLensCenterOffsetY = gSettings->lensCenterOffsetY;
-    oldLensType = gSettings->lensType;
+    oldLensCenterOffsetY = gSettings->lensCenterOffsetY;    
 }
 
 Camera660Driver::~Camera660Driver()
 {
-    ROS_DEBUG("Camera660Driver::~Camera660Driver()");
+    //ROS_DEBUG("Camera660Driver::~Camera660Driver()");
     communication.stopStream();
     ros::Duration(1).sleep();
-    communication.close();
+    communication.close();    
 }
 
 
 void Camera660Driver::closeCommunication()
 {
-    ROS_DEBUG("Camera660Driver::closeCommunication()"); //TODo remove
+    //ROS_DEBUG("Camera660Driver::closeCommunication()"); //TODo remove
     communication.close();
 }
 
@@ -84,6 +83,7 @@ void Camera660Driver::setParameters()
     if(gSettings->updateParam)
     {
         gSettings->updateParam = false;
+
         ROS_INFO("update parameters");
 
         framePeriod = 1.0 / gSettings->frameRate;
@@ -92,22 +92,26 @@ void Camera660Driver::setParameters()
         communication.setIntegrationTime3d(gSettings->integrationTimeTOF1, gSettings->integrationTimeTOF2, gSettings->integrationTimeTOF3, gSettings->integrationTimeGray);        
         communication.setMinimalAmplitude(gSettings->minAmplitude);
         communication.setModulationFrequency(gSettings->modFrequency, gSettings->modChannel);
-        communication.setFilter(gSettings->medianFilter, gSettings->averageFilter, 1000.0 * gSettings->kalmanFactor, gSettings->kalmanThreshold, gSettings->edgeThreshold, gSettings->interferenceDetectionLimit, gSettings->interferenceDetectionUseLastValue);
+        communication.setFilter(gSettings->medianFilter, gSettings->averageFilter, 1000.0 * gSettings->kalmanFactor, gSettings->kalmanThreshold,
+                                gSettings->edgeThreshold, gSettings->interferenceDetectionLimit, gSettings->interferenceDetectionUseLastValue);
         communication.setRoi(gSettings->roi_leftX, gSettings->roi_topY, gSettings->roi_rightX, gSettings->roi_bottomY);
 
+        bool lensFlag = false;
+        if(gSettings->lensData.compare(old_lensData) != 0) lensFlag = true;
+
         //lens parameters for cartesian transformation
-        if(oldLensCenterOffsetX != gSettings->lensCenterOffsetX  || oldLensCenterOffsetY != gSettings->lensCenterOffsetY || oldLensType != gSettings->lensType){
-            cartesian.initLensTransform(sensorPointSizeMM, numCols, numRows, gSettings->lensCenterOffsetX, gSettings->lensCenterOffsetY, gSettings->lensType);
+        if(oldLensCenterOffsetX != gSettings->lensCenterOffsetX  || oldLensCenterOffsetY != gSettings->lensCenterOffsetY || lensFlag){
+            cartesian.initLensTransform(sensorPointSizeMM, numCols, numRows, gSettings->lensCenterOffsetX, gSettings->lensCenterOffsetY, gSettings->lensData);
             oldLensCenterOffsetX = gSettings->lensCenterOffsetX;
-            oldLensCenterOffsetY = gSettings->lensCenterOffsetY;
-            oldLensType = gSettings->lensType;
+            oldLensCenterOffsetY = gSettings->lensCenterOffsetY;            
         }        
 
     } //END if(gSettings->updateParam)
 }
 
+
 void Camera660Driver::updateData()
-{      
+{
     ros::Time timeNow = ros::Time::now();
     double elapsed_time = timeNow.toSec() - timeLast.toSec();
 
@@ -115,18 +119,21 @@ void Camera660Driver::updateData()
 
         timeLast = timeNow;
 
-        ROS_DEBUG("FRAME RATE HZ: %2.4f", 1.0/elapsed_time);
+        //ROS_DEBUG("FRAME RATE HZ: %2.4f", 1.0/elapsed_time);
 
         switch(gSettings->iType)
         {
             case TofCam660Image::ImageType_e::GRAYSCALE:
-                  communication.getGrayscale();
+                  communication.getGrayscale(com_const::Acquisition::VALUE_AUTO_REPEAT_MEASUREMENT);
                   break;
             case TofCam660Image::ImageType_e::DISTANCE:
-                  communication.getDistance();
+                  communication.getDistance(com_const::Acquisition::VALUE_AUTO_REPEAT_MEASUREMENT);
                   break;
             case TofCam660Image::ImageType_e::DISTANCE_AMPLITUDE:
-                  communication.getDistanceAmplitude();
+                  communication.getDistanceAmplitude(com_const::Acquisition::VALUE_AUTO_REPEAT_MEASUREMENT);
+                  break;
+            case TofCam660Image::ImageType_e::DCS:
+                  communication.getDcs(com_const::Acquisition::VALUE_AUTO_REPEAT_MEASUREMENT);
                   break;
         }
 
@@ -151,7 +158,7 @@ void Camera660Driver::initCommunication()
 
 void Camera660Driver::updateTemperature(double temperature)
 {
-    ROS_DEBUG("Temperature: %2.2f", temperature);
+    //ROS_DEBUG("Temperature: %2.2f", temperature);
     msgTemperature.header.frame_id = "sensor_frame";
     msgTemperature.variance = 0.0; //0.05 ?
     msgTemperature.header.stamp = ros::Time::now();
@@ -242,7 +249,7 @@ void Camera660Driver::updateDistanceFrame(std::shared_ptr<com_lib::TofCam660Imag
             cloud->points.resize(static_cast<ulong>(nPixel));
             sz_pc = static_cast<int>(nPixel);
         }
-                
+
         int k;
         double px, pz, py;
         int16_t leftX   = static_cast<int16_t>(image->getLeftX());
@@ -255,8 +262,9 @@ void Camera660Driver::updateDistanceFrame(std::shared_ptr<com_lib::TofCam660Imag
 
                 uint dist = ((static_cast<uint16_t>(data[l+1])<<8) & 0xff00) + (static_cast<uint16_t>(data[l]) & 0x00ff);
                 pcl::PointXYZI &p = cloud->points[k];
+		
 
-                if(dist < CommunicationConstants::PixelTofCam660::LIMIT_VALID_PIXEL && dist>= gSettings->minDistance && dist <= gSettings->maxDistance){
+                if(dist < com_const::PixelTofCam660::LIMIT_VALID_PIXEL && dist>= gSettings->minDistance && dist <= gSettings->maxDistance){
 
                     if(gSettings->enableCartesian)
                     {
@@ -291,7 +299,7 @@ void Camera660Driver::updateDistanceFrame(std::shared_ptr<com_lib::TofCam660Imag
 }
 
 void Camera660Driver::updateDistanceAmplitudeFrame(std::shared_ptr<TofCam660Image> image)
-{    
+{
     uint i, l;
     std::vector<uint8_t>& data = image->getData();
 
@@ -318,7 +326,7 @@ void Camera660Driver::updateDistanceAmplitudeFrame(std::shared_ptr<TofCam660Imag
         }
 
 
-        for(l=0, i=25; l< dataSize; i+=4, l+=2){                                    
+        for(l=0, i=25; l< dataSize; i+=4, l+=2){
             img16_1.data[l]   = data[i];
             img16_1.data[l+1] = data[i+1];
         }
@@ -366,7 +374,7 @@ void Camera660Driver::updateDistanceAmplitudeFrame(std::shared_ptr<TofCam660Imag
             cloud->points.resize(nPixel);
         }
 
-        uint x, y, k;             
+        uint x, y, k;
         double px, pz, py;
         uint16_t leftX   = static_cast<uint16_t>(image->getLeftX());
         uint16_t topY    = static_cast<uint16_t>(image->getTopY());
@@ -387,7 +395,7 @@ void Camera660Driver::updateDistanceAmplitudeFrame(std::shared_ptr<TofCam660Imag
 
                 pcl::PointXYZI &p = cloud->points[k];
 
-                if(dist < CommunicationConstants::PixelTofCam660::LIMIT_VALID_PIXEL && dist>= gSettings->minDistance && dist <= gSettings->maxDistance){ //&& ampl>= gSettings->minAmplitude
+                if(dist < com_const::PixelTofCam660::LIMIT_VALID_PIXEL && dist>= gSettings->minDistance && dist <= gSettings->maxDistance){ //&& ampl>= gSettings->minAmplitude
 
                     if(gSettings->enableCartesian){
                         cartesian.transformPixel(x, y, (double)(dist), px, py, pz);

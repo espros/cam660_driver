@@ -21,7 +21,8 @@ TofCam660Image::TofCam660Image(const vector<uint8_t> &data)
 
     temperature = static_cast<double>(Util::getInt16BigEndian(data, 21)) / 100.0;
     offset = Util::getInt16BigEndian(data, 23); //offset where measurement data begins
-    ROS_DEBUG("TofCam660Image header: v= %d type=%d w= %d h= %d temp= %2.2f offset= %d roiX0 = %d, roiY0= %d, roiX1= %d, roiY1 = %d", version, dataType, width, height, temperature, offset, roiX0, roiY0, roiX1, roiY1);
+    //ROS_DEBUG("TofCam660Image header: v= %d type=%d w= %d h= %d temp= %2.2f offset= %d roiX0 = %d, roiY0= %d, roiX1= %d, roiY1 = %d", 
+    //version, dataType, width, height, temperature, offset, roiX0, roiY0, roiX1, roiY1);
 }
 
 unsigned int TofCam660Image::getWidth() const

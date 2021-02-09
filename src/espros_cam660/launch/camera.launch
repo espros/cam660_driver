@@ -4,7 +4,7 @@
   <arg name="ns" default="espros_cam660"/>
   <arg name="nn" default="camera"/>
   <arg name="respawn" default="false"/>  
-  <arg name="lens_type" default="0"/>
+  <arg name="lens_data" default="lens_wf"/>
   <arg name="lens_center_offset_x" default="0"/>
   <arg name="lens_center_offset_y" default="0"/>
   <arg name="image_type" default="1"/>
@@ -43,7 +43,7 @@
           respawn="$(arg respawn)">
 
 
-      <param name="lens_type" value="$(arg lens_type)"/>
+      <param name="lens_data" value="$(arg lens_data)"/>
       <param name="lens_center_offset_x" value="$(arg lens_center_offset_x)"/>
       <param name="lens_center_offset_y" value="$(arg lens_center_offset_y)"/>
       <param name="image_type" value="$(arg image_type)"/>

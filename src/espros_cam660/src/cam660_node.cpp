@@ -3,6 +3,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <espros_cam660/espros_cam660Config.h>
 #include <signal.h>
+#include <cstdlib>
 
 #include "camera660_driver.h"
 #include "cam660_image.h"
@@ -36,8 +37,8 @@ void updateConfig(espros_cam660::espros_cam660Config &config, uint32_t level)
     default: break;
     }
 
-    settings.frameRate = config.frame_rate;
-    settings.lensType = config.lens_type;
+    settings.lensData = config.lens_data;
+    settings.frameRate = config.frame_rate;    
     settings.lensCenterOffsetX = config.lens_center_offset_x;
     settings.lensCenterOffsetY = config.lens_center_offset_y;
     settings.hdrMode = config.hdr_mode;
@@ -87,9 +88,9 @@ void updateConfig(espros_cam660::espros_cam660Config &config, uint32_t level)
         settings.runVideo = true;
 
     settings.triggerSingleShot = config.trigger_single_shot;
-    settings.updateParam = true;    
-}
+    settings.updateParam = true;
 
+}
 
 
 void initialiseNode()
@@ -107,14 +108,14 @@ void initialiseNode()
     settings.runVideo = false;
     settings.updateParam = false;
 
-    ROS_INFO("Camera 660 driver version 1.2.0");
+    ROS_INFO("Camera 660 driver version 1.3.5");
 }
 
 //======================================================================
 
 int main(int argc, char **argv)
 {
-    //if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) ros::console::notifyLoggerLevelsChanged();
+    //if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) ros::console::notifyLoggerLevelsChanged();
 
     ros::init(argc, argv, "cam660_node");
 
@@ -125,11 +126,20 @@ int main(int argc, char **argv)
 
     initialiseNode();
 
-    cameraDriver = new Camera660Driver (imagePublisher1, imagePublisher2, pointCloud2Publisher, temperaturePublisher, settings);
+    ros::Rate rate(100);
 
-    while(ros::ok()){
-        cameraDriver->update();
-        ros::spinOnce();
+    try{
+        cameraDriver = new Camera660Driver (imagePublisher1, imagePublisher2, pointCloud2Publisher, temperaturePublisher, settings);
+
+        while(ros::ok()){
+            cameraDriver->update();
+            ros::spinOnce();
+            rate.sleep();
+        }
+    }
+
+    catch(int e){
+        ROS_ERROR("Program aborted. Exit code %d", e);
     }
 
 }

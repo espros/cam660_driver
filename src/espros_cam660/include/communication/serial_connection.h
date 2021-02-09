@@ -43,31 +43,32 @@ public:
     ~SerialConnection();
 
     boost::signals2::signal< void (const std::vector<uint8_t>&, const uint8_t)>  sigReceivedData;
-    std::vector<uint8_t> rxArray;
 
+    void closePort();
     bool openPort(std::string portName);
-    void closePort();    
-    int  readRxData(int size);
     ssize_t sendData(uint8_t *data);
-
+    bool processData(int size);
+    ErrorNumber_e readRxData(int size);
 
 private:
 
-    int getExpextedSize(const std::vector<uint8_t> &array);
-    uint8_t getAnswType(const std::vector<uint8_t> &array);
-    uint8_t getDataType(const std::vector<uint8_t> &array);
-    int setInterfaceAttribs (int speed);
-    void setBlocking(int should_block);
-    bool processData(std::vector<uint8_t> array);
-    bool checkEndMark(std::vector<uint8_t> array);
+    uint8_t getType();
+    int getExpextedSize(uint8_t *array);
+    uint8_t getAnswType(uint8_t *array);
+    uint8_t getDataType(uint8_t *array);    
+    int  setInterfaceAttribs (int speed);    
+    bool checkEndMark(uint8_t *array, int size);
 
     int expectedSize;
-    int fileDescription;
+    int fileID;
     bool waitForSpecificDataType;
 
     uint8_t expectedType;    
     std::list<uint8_t> generalAnswerTypes;
     std::vector<std::string> deviceListString;
+        
+    uint8_t rxArray[307325];    
+    std::vector<uint8_t> dataArray;        
 };
 
 

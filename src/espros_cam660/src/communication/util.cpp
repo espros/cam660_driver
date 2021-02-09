@@ -22,6 +22,19 @@ namespace com_lib
     return value;
   }
 
+
+  uint32_t Util::getUint32LittleEndian(uint8_t* array, const unsigned int index)
+  {
+    unsigned int byte0 = array[index];
+    unsigned int byte1 = array[index+1];
+    unsigned int byte2 = array[index+2];
+    unsigned int byte3 = array[index+3];
+    uint32_t value = (byte3 << 24) | (byte2 << 16) | (byte1 << 8) | byte0;
+    return value;
+  }
+
+
+
   uint32_t Util::getUint32BigEndian(const std::vector<uint8_t> &array, const unsigned int index)
   {
       unsigned int byte0 = array.at(index);

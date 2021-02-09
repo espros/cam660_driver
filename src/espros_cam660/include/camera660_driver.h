@@ -31,7 +31,6 @@ struct Settings{
   uint integrationTimeTOF3;
   uint integrationTimeGray;
 
-  int lensType;
   int imageType;
   int hdrMode;
   int modFrequency;
@@ -60,6 +59,7 @@ struct Settings{
   int roi_rightX;
   int roi_bottomY;
 
+  std::string lensData;
   com_lib::TofCam660Image::ImageType_e iType;
 
 };
@@ -99,10 +99,9 @@ private:
     sensor_msgs::Image img16_1;
     sensor_msgs::Image img16_2;
     sensor_msgs::Temperature msgTemperature;
-
     com_lib::Communication communication;
 
-    int distortionTableSize;
+    int lensTableSize;
     int numCols;
     int numRows;
     double lensAngle[101];
@@ -113,7 +112,7 @@ private:
     double sensorPointSizeMM;
     int oldLensCenterOffsetX;
     int oldLensCenterOffsetY;
-    int oldLensType;
+    std::string old_lensData;
 
     void updateData();
     void setParameters();

@@ -28,6 +28,7 @@ namespace com_lib
       static uint32_t getUint16BigEndian(const std::vector<uint8_t> &array, const unsigned int index);
       static uint32_t getUint16LittleEndian(const std::vector<uint8_t> &array, const unsigned int index);
       static uint32_t getUint32LittleEndian(const std::vector<uint8_t> &array, const unsigned int index);
+      static uint32_t getUint32LittleEndian(uint8_t* array, const unsigned int index);
       static uint32_t getUint32BigEndian(const std::vector<uint8_t> &array, const unsigned int index);
       static int32_t getInt16LittleEndian(const std::vector<uint8_t> &array, const unsigned int index);
       static void setUint16LittleEndian(uint8_t *buffer, const unsigned int index, const unsigned int value);

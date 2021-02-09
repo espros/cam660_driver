@@ -3,6 +3,9 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 typedef unsigned int uint;
 
@@ -15,12 +18,12 @@ public:
     CartesianTransform();
     ~CartesianTransform();    
     void transformPixel(uint srcX, uint srcY, double srcZ, double &destX, double &destY, double &destZ);
-    void initLensTransform(double sensorSizeMM, int width, int height, int offsetX, int offsetY, int lensType);
+    void initLensTransform(double sensorSizeMM, int width, int height, int offsetX, int offsetY, std::string &lensData);
 
 
 private:
 
-    int distortionTableSize;
+    int lensTableSize;
     int numCols;
     int numRows;
     double angle[101];
@@ -30,8 +33,9 @@ private:
     double zUA[320][240];
 
     double getAngle(double x, double y, double sensorPointSizeMM);
-    double interpolate(double x_in, double x0, double y0, double x1, double y1);
-    void initLensDistortionTable(LensType lensType);
+    double interpolate(double x_in, double x0, double y0, double x1, double y1);    
+    void loadLensDistortionTable(std::string &lensData);
+    int readLine(std::string str, std::ifstream &file);
 
 };
 

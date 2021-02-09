@@ -8,8 +8,8 @@
  *
  * @{
  */
-#ifndef COMMUNICATION_COMMUNICATIONCONSTANTS_H_
-#define COMMUNICATION_COMMUNICATIONCONSTANTS_H_
+#ifndef COMMUNICATION_com_const_H_
+#define COMMUNICATION_com_const_H_
 
 #include <stdint.h>
 
@@ -54,7 +54,7 @@ enum ErrorNumber_e
 }
 
 
-namespace CommunicationConstants
+namespace com_const
 {
 
 namespace AnswerType
@@ -214,8 +214,8 @@ namespace Acquisition
 {
 const uint32_t INDEX_ACQUISITION_TYPE = 2;                                ///<Index of the acquisition type
 const uint8_t VALUE_SINGLE_MEASUREMENT = 0;                               ///<The sensor makes one acquisition on command
-const uint8_t VALUE_AUTO_REPEAT_MEASUREMENT = 1;                          ///<The sensor starts to make acquisitions until it gets a stop command
-const uint8_t VALUE_STREAMING_MEASUREMENT = 2;                            ///<The sensor makes an acquisition, and during sending the data, the next acquisition is started already
+const uint8_t VALUE_STREAMING_MEASUREMENT = 1;                            ///<The sensor makes an acquisition, and during sending the data, the next acquisition is started already
+const uint8_t VALUE_AUTO_REPEAT_MEASUREMENT = 2;                          ///<The sensor starts to make acquisitions until it gets a stop command
 }
 
 namespace TofCam660Header
@@ -286,6 +286,7 @@ const uint32_t INDEX_INDEX = 2;                                          ///<Ind
 const uint32_t INDEX_AMPLITUDE = 3;                                      ///<Index of the minimal amplitude
 }
 
+
 }
 
-#endif /* COMMUNICATION_COMMUNICATIONCONSTANTS_H_ */
+#endif /* COMMUNICATION_com_const_H_ */

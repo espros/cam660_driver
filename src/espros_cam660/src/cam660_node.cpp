@@ -46,7 +46,7 @@ void updateConfig(espros_cam660::espros_cam660Config &config, uint32_t level)
     settings.integrationTimeTOF2  = static_cast<uint>(config.integration_time_tof_2);
     settings.integrationTimeTOF3  = static_cast<uint>(config.integration_time_tof_3);
     settings.integrationTimeGray   = static_cast<uint>(config.integration_time_gray);
-    settings.modFrequency = config.frequence_modulation;
+    settings.modFrequency = config.frequency_modulation;
     settings.modChannel = config.channel_modulation;
 
     settings.medianFilter = config.median_filter;

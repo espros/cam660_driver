@@ -8,9 +8,11 @@ Author: linas.sinkunas@espros.com
 
 
 ********************************************************************************
-Software v.1.3.5 - Document dated 12.02.2021
- - Added catch exception
- - Code speed optimization
+software v.1.3.5 - Document dated 15.02.2021
+
+  - Code refactoring and optimisation
+  - Added temperature topic
+  - Changed dynamic parameter names
 
 
 Software v.1.3.0 - 23.11.2020

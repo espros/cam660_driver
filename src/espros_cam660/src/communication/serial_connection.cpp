@@ -180,28 +180,32 @@ int SerialConnection::setInterfaceAttribs(int speed)
     struct termios tty;
     memset (&tty, 0, sizeof tty);
 
+    tcgetattr (fileID, &tty); //TODO...
+
     cfsetospeed (&tty, speed);
     cfsetispeed (&tty, speed);
 
-    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-
-    // disable IGNBRK for mismatched speed tests; otherwise receive break as \000 chars
-    tty.c_iflag &= ~IGNBRK;         // disable break processing
-    tty.c_lflag = 0;                // no signaling chars, no echo,
-
     // no canonical processing
+    // disable IGNBRK for mismatched speed tests; otherwise receive break as \000 chars
+
     tty.c_oflag = 0;                // no remapping, no delays
+    tty.c_oflag &= ~(ONLCR | OCRNL); //TODO...
+
+    tty.c_lflag = 0;                // no signaling chars, no echo,
+    tty.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN); //TODO...
+
+    tty.c_iflag &= ~IGNBRK;         // disable break processing
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+    tty.c_iflag &= ~(INLCR | IGNCR | ICRNL); //TODO...
+
     tty.c_cc[VMIN]  = 0;            // non-blocking read
     tty.c_cc[VTIME] = 10;            // 1 second read timeout
-    
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls
 
-    // enable reading
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars                
     tty.c_cflag &= ~(PARENB | PARODD);  // shut off parity
     tty.c_cflag &= ~CSTOPB;    //one stop bit
-    //tty.c_cflag &= ~CRTSCTS;   //no data DTR hardware control
-    tty.c_cflag |= CRTSCTS;   //data DTR hardware control  
+    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls   
+    tty.c_cflag |= CRTSCTS;   //data DTR hardware control do not use it
 
     tcflush(fileID, TCIOFLUSH);
 
@@ -289,10 +293,7 @@ ErrorNumber_e SerialConnection::readRxData(int size)
 
         }else if(n == 0 && i < size-1){
 
-            ros::Duration(0.01).sleep();
-            tcflush(fileID, TCIOFLUSH); //TODO... lsi
-
-	    ROS_ERROR("serialConnection->readRxData %d bytes from %d received", i, size);
+            ROS_ERROR("serialConnection->readRxData %d bytes from %d received", i, size);
             return ERROR_NUMBER_SERIAL_PORT_ERROR;
         }
 
